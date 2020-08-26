@@ -1,4 +1,10 @@
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
 
 import javax.swing.*;
 
@@ -9,6 +15,8 @@ public class ChatClient {
 	static JTextField textField = new JTextField(40);
 	static JLabel blankLabel = new JLabel("       ");
 	static JButton sendButton = new JButton("Send");
+	static BufferedReader in;
+	static PrintWriter out;
 	
 	
     public ChatClient() {
@@ -25,8 +33,64 @@ public class ChatClient {
     	textField.setEditable(false);
     	chatArea.setEditable(false);
     	
+    	sendButton.addActionListener(new Listener());
+    	textField.addActionListener(new Listener());
+    	
     }
-	public static void main(String[] args) {
+    
+    void startChat() throws Exception {
+    	String ipAddress = JOptionPane.showInputDialog(
+    			chatWindow,
+    			"Enter IP Address",
+    			"IP Address Required!",
+    			JOptionPane.PLAIN_MESSAGE);
+    	Socket soc = new Socket(ipAddress, 9806);
+    	in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
+    	out = new PrintWriter(soc.getOutputStream(), true);
+    	
+    	while (true) {
+    		String str = in.readLine();
+    		if (str.equals("Name required")) {
+    			String name = JOptionPane.showInputDialog(
+    					chatWindow,
+    					"Enter a unique name:",
+    					"Name required!",
+    					JOptionPane.PLAIN_MESSAGE);
+    			out.println(name);
+    			
+    		} else if (str.equals("Name already exists!")) {
+    			String name = JOptionPane.showInputDialog(
+    					chatWindow,
+    					"Enter another name:",
+    					"Name already exists!",
+    					JOptionPane.WARNING_MESSAGE);
+    			out.println(name);
+    		} else if (str.equals("Name Accepted!")) {
+    			textField.setEditable(true);
+    			break;
+    		} 
+    	}
+    	
+    	while (true) {
+    		String str = in.readLine();
+    		chatArea.append(str + "\n");
+    	}
+    }
+    
+   
+   
+	public static void main(String[] args) throws Exception{
     	ChatClient client = new ChatClient();
+    	client.startChat();
     }
 }
+
+class Listener implements ActionListener {
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		ChatClient.out.println(ChatClient.textField.getText());
+		ChatClient.textField.setText("");
+	}
+}
+
+
