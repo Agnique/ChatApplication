@@ -17,11 +17,12 @@ public class ChatClient {
 	static JButton sendButton = new JButton("Send");
 	static BufferedReader in;
 	static PrintWriter out;
-	
+	static JLabel nameLabel = new JLabel("     ");
 	
     public ChatClient() {
     	
     	chatWindow.setLayout(new FlowLayout());
+    	chatWindow.add(nameLabel);
     	chatWindow.add(new JScrollPane(chatArea));
     	chatWindow.add(blankLabel);
     	chatWindow.add(textField);
@@ -65,8 +66,9 @@ public class ChatClient {
     					"Name already exists!",
     					JOptionPane.WARNING_MESSAGE);
     			out.println(name);
-    		} else if (str.equals("Name Accepted!")) {
+    		} else if (str.startsWith("Name Accepted!")) {
     			textField.setEditable(true);
+    			nameLabel.setText("You are logged in as: " + str.substring(14));
     			break;
     		} 
     	}
